@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <script>
+        const messageElement = document.getElementById('message');
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        if (!id) {
+            messageElement.textContent = "'id' Parameter Is Required";
+        } else {
+            // Avoid caching of the JSON file
+            fetch(`links.json?ts=${Date.now()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    return response.json();
+                })
+                .then(links => {
+                    const redirectUrl = links[id];
+                    if (typeof redirectUrl === 'string' && redirectUrl.trim() !== '') {
+                        window.location.replace(redirectUrl);
+                    } else {
+                        throw new Error('No valid URL found for this ID.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Redirect failed:', error);
+                    messageElement.textContent = `Redirect failed: ${error.message}`;
+                });
+        }
+    </script>
+</body>
+</html>
